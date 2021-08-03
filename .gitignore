@@ -2,3 +2,5 @@ dist/
 /*.d.ts
 node_modules
 npm-debug.log
+/*.pyc
+server/flask_session
