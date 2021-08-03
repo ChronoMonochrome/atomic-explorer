@@ -3,23 +3,65 @@ import { Chessground }  from 'chessground';
 import { Unit } from './unit';
 import { toColor, toDests, aiPlay, playOtherSide } from '../util'
 
+declare global {
+    interface Window { chess: any; }
+    interface Window { Chess: any; }
+	interface Window { playOtherSide: any; }
+	interface Window { toDests: any; }
+	interface Window { chessground: any; }
+}
+//getDests(cg.getFen())
+async function getDests(fen: any) : Promise<Map<any, any[]>> {
+	var enc_fen = encodeURIComponent(fen);
+	var resp = await fetch(window.location.origin + "/moves?fen=" + enc_fen, {
+	  // mode: 'no-cors',
+	  method: 'GET',
+	  headers: {
+		Accept: 'application/json',
+	  },
+	});
+	
+	var moves = await resp.text();
+	return new Map(JSON.parse(moves));
+}
+
 export const initial: Unit = {
   name: 'Play legal moves from initial position',
   run(el) {
     const chess = new Chess();
+	
+	
     const cg = Chessground(el, {
       movable: {
         color: 'white',
         free: false,
-        dests: toDests(chess),
       },
       draggable: {
         showGhost: true
       }
     });
+
+	getDests(cg.getFen()).then(result => {
+		console.log(result);
+		
+		cg.set({
+		  movable: { dests: result }
+		});
+    // got final result
+});
+
     cg.set({
       movable: { events: { after: playOtherSide(cg, chess) } }
     });
+	
+
+	
+    window.Chess = Chess;
+    window.chess = chess;
+	window.toDests = toDests;
+	window.playOtherSide = playOtherSide;
+    window.chessground = cg;
+
     return cg;
   }
 };

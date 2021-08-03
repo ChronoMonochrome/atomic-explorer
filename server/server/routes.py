@@ -9,10 +9,10 @@ import chess.variant
 board = chess.variant.AtomicBoard()
 
 def encodeFen(fen):
-	return urllib.parse.quote(fen).replace("/", "_")
+	return urllib.parse.quote(fen, safe = "")
 	
 def decodeFen(fen):
-	return urllib.parse.unquote(fen).replace("_", "/")
+	return urllib.parse.unquote(fen)
 	
 def moves2chessground(moves):
 	moves_dict = dict()
@@ -26,7 +26,7 @@ def moves2chessground(moves):
 		else:
 			moves_dict[from_square].append(to_square)
 			
-	return moves_dict
+	return list(list(i) for i in moves_dict.items())
 
 @app.route("/")
 def home():
@@ -35,6 +35,7 @@ def home():
 	
 @app.route("/moves")
 def moves():
-	fen = request.args.get('fen', board.fen())
+	fen = decodeFen(request.args.get('fen', board.fen()))
 
-	return str(moves2chessground(board.legal_moves))
+	board.set_fen(fen)
+	return str(moves2chessground(board.legal_moves)).replace("'", "\"")
