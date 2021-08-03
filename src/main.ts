@@ -11,7 +11,7 @@ export function run(element: Element) {
 
   const patch = init([klass, attributes, listeners]);
 
-  const lastZoom = parseFloat(localStorage.getItem('lichess-dev.cge.zoom')!) || 100;
+  const lastZoom = parseFloat(localStorage.getItem('lichess-dev.cge.zoom')!) || 400;
 
   let unit: Unit, cg: Api, vnode: VNode;
 
@@ -24,13 +24,13 @@ export function run(element: Element) {
     el.className = 'cg-wrap';
     cg = unit.run(el);
     window['cg'] = cg; // for messing up with it from the browser console
-    if (lastZoom !== 100) setZoom(lastZoom);
+    if (lastZoom !== 400) setZoom(lastZoom);
   }
 
   function setZoom(zoom: number) {
     const el = document.querySelector('.cg-wrap') as HTMLElement;
     if (el) {
-      const px = `${zoom / 100 * 320}px`;
+      const px = `${zoom / 400 * 320}px`;
       el.style.width = px;
       el.style.height = px;
       document.body.dispatchEvent(new Event('chessground.resize'));
@@ -39,14 +39,14 @@ export function run(element: Element) {
 
   function render() {
     return h('div#chessground-examples', [
-      h('menu', list.map((ex, id) => {
+      /*h('menu', list.map((ex, id) => {
         return h('a', {
           class: {
             active: unit.name === ex.name
           },
           on: { click: () => page(`/${id}`) }
         }, ex.name);
-      })),
+      })),*/
       h('section.blue.merida', [
         h('div.cg-wrap', {
           hook: {
