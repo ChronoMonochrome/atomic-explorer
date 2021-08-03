@@ -7,6 +7,8 @@ export function toDests(chess: any): Map<Key, Key[]> {
     const ms = chess.moves({square: s, verbose: true});
     if (ms.length) dests.set(s, ms.map(m => m.to));
   });
+  
+  console.log(dests)
   return dests;
 }
 
