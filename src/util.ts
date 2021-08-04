@@ -12,8 +12,8 @@ export function toDests(chess: any): Map<Key, Key[]> {
   return dests;
 }
 
-export function toColor(chess: any): Color {
-  return (chess.turn() === 'w') ? 'white' : 'black';
+export function toColor(colorLetter: any): Color {
+  return (colorLetter === 'w') ? 'white' : 'black';
 
 }
 
