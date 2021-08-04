@@ -4,13 +4,14 @@ import { Unit } from './unit';
 import { toColor, toDests, aiPlay, playOtherSide } from '../util'
 
 declare global {
-    interface Window { chess: any; }
+    //interface Window { chess: any; }
     interface Window { Chess: any; }
 	interface Window { playOtherSide: any; }
 	interface Window { toDests: any; }
 	interface Window { chessground: any; }
 }
 //getDests(cg.getFen())
+
 async function getDests(fen: any) : Promise<Map<any, any[]>> {
 	var enc_fen = encodeURIComponent(fen);
 	var resp = await fetch(window.location.origin + "/moves?fen=" + enc_fen, {
@@ -25,11 +26,42 @@ async function getDests(fen: any) : Promise<Map<any, any[]>> {
 	return new Map(JSON.parse(moves));
 }
 
+var turnColor1 = 0;
+
+export function playOtherSide1(cg: any/*, turnColor: any*/) {
+  return (orig, dest) => {
+    //chess.move({from: orig, to: dest});
+	console.log("Moved from " + orig + " to " + dest);
+
+	console.log("New fen is: ");
+	//var fen = JSON.stringify(cg.getFen()).slice(1, -1) + " " + ((turnColor == "white") ? "w" : "b");
+	var fen = JSON.stringify(cg.getFen()).slice(1, -1) + " " + ((turnColor1 % 2 == 0) ? "b" : "w");
+	
+	var turnColor = (turnColor1 % 2 == 0) ? "black" : "white";
+	turnColor1++;
+	
+	console.log(fen);
+	getDests(fen).then(result => {
+		console.log("Available moves: ");
+		console.log(result);
+	
+		cg.set({
+		  turnColor: turnColor,
+		  movable: {
+			color: turnColor,
+			dests: result
+		  }
+		});
+	});
+  };
+}
+
 export const initial: Unit = {
   name: 'Play legal moves from initial position',
   run(el) {
-    const chess = new Chess();
+    //var chess = new Chess();
 	
+	//const cg = Chessground(el);
 	
     const cg = Chessground(el, {
       movable: {
@@ -40,6 +72,9 @@ export const initial: Unit = {
         showGhost: true
       }
     });
+	
+	cg.set({fen: "8/p7/8/1K1k4/8/8/6P1/8 w - - 0 1"});
+	//chess = new Chess("8/p7/8/1K1k4/8/8/6P1/8 w - - 0 1");
 
 	getDests(cg.getFen()).then(result => {
 		console.log(result);
@@ -47,19 +82,17 @@ export const initial: Unit = {
 		cg.set({
 		  movable: { dests: result }
 		});
-    // got final result
-});
+		// got final result
+	});
 
     cg.set({
-      movable: { events: { after: playOtherSide(cg, chess) } }
+      movable: { events: { after: playOtherSide1(cg/*, cg.state.turnColor == "white" ? "black" : "white"*/) } }
     });
 	
-
-	
     window.Chess = Chess;
-    window.chess = chess;
+   // window.chess = chess;
 	window.toDests = toDests;
-	window.playOtherSide = playOtherSide;
+	window.playOtherSide = playOtherSide1;
     window.chessground = cg;
 
     return cg;
