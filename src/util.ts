@@ -30,6 +30,13 @@ export function playOtherSide(cg: Api, chess) {
   };
 }
 
+export function mapToObj(map){
+  const obj = {}
+  for (let [k,v] of map)
+    obj[k] = v
+  return obj
+}
+
 export function aiPlay(cg: Api, chess, delay: number, firstMove: boolean) {
   return (orig, dest) => {
     chess.move({from: orig, to: dest});

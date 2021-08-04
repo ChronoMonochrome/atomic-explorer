@@ -3,7 +3,7 @@ import { Chessground }  from 'chessground';
 import * as util from 'chessground/util';
 import * as cg from 'chessground/types';
 import { Unit } from './unit';
-import { toColor, toDests, aiPlay, playOtherSide } from '../util'
+import { toColor, toDests, aiPlay, playOtherSide, mapToObj } from '../util'
 
 declare global {
     //interface Window { chess: any; }
@@ -49,13 +49,6 @@ export function capture(cG: any, key: cg.Key) {
   }
   cG.setPieces(diff);
   cG.explode(exploding);
-}
-
-function mapToObj(map){
-  const obj = {}
-  for (let [k,v] of map)
-    obj[k] = v
-  return obj
 }
 
 var turnColor1 = 0;
