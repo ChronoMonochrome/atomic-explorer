@@ -18,6 +18,46 @@ async function getDests(fen: any) : Promise<Map<any, any[]>> {
 	return new Map(JSON.parse(moves));
 }
 
+var movesCount = 0;
+var pieces;
+
+export function move(cG: any, orig?: any, dest?: any) {	
+	if (orig != undefined && dest != undefined) {
+		console.log("Moved from " + orig + " to " + dest);
+		console.log(pieces[dest]);
+		
+		if (pieces[dest] != undefined) {
+			console.log("Destination square is occupied, calling a nuke on that square!");
+			capture(cG, dest);
+		}
+	}
+	
+	var fen = JSON.stringify(cG.getFen()).slice(1, -1) + " " + ((movesCount % 2 == 0) ? "w" : "b");
+	var turnColor = (movesCount % 2 == 0) ? "white" : "black";
+
+	console.log("Fen is: ");
+	console.log(fen);
+	
+	getDests(fen).then(result => {
+		console.log("Available moves: ");
+		console.log(result);
+		
+		pieces = mapToObj(cG.state.pieces);
+		console.log("Pieces on the board:");
+		console.log(pieces);
+
+		cG.set({
+		  turnColor: turnColor,
+		  movable: {
+			color: turnColor,
+			dests: result
+		  }
+		});
+		
+		movesCount++;
+	});
+}
+
 export function capture(cG: any, key: cg.Key) {
   const exploding: cg.Key[] = [],
     diff: cg.PiecesDiff = new Map(),
@@ -40,44 +80,11 @@ export function capture(cG: any, key: cg.Key) {
   cG.explode(exploding);
 }
 
-var turnColor1 = 0;
-var pieces;
-
 export function playOtherSide1(cG: any) {
   //console.log(cG.getFen());
 
   return (orig, dest) => {
-	console.log("Moved from " + orig + " to " + dest);
-	console.log(pieces[dest]);
-	
-	if (pieces[dest] != undefined) {
-		console.log("Destination square is occupied, calling a nuke on that square!");
-		capture(cG, dest);
-	}
-
-	console.log("New fen is: ");
-	var fen = JSON.stringify(cG.getFen()).slice(1, -1) + " " + ((turnColor1 % 2 == 0) ? "b" : "w");
-	
-	var turnColor = (turnColor1 % 2 == 0) ? "black" : "white";
-	turnColor1++;
-	
-	console.log(fen);
-	getDests(fen).then(result => {
-		console.log("Available moves: ");
-		console.log(result);
-		
-		pieces = mapToObj(cG.state.pieces);
-		console.log("Pieces on the board:");
-		console.log(pieces);
-	
-		cG.set({
-		  turnColor: turnColor,
-		  movable: {
-			color: turnColor,
-			dests: result
-		  }
-		});
-	});
+	move(cG, orig, dest);
   };
 }
 
@@ -95,20 +102,8 @@ export const initial: Unit = {
     });
 	
 	//cG.set({fen: "rnbqkbnr/pppp1ppp/4p3/4N3/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1"});
-	//chess = new Chess("8/p7/8/1K1k4/8/8/6P1/8 w - - 0 1");
 
-	getDests(cG.getFen()).then(result => {
-		console.log(result);
-		
-		pieces = mapToObj(cG.state.pieces);
-		console.log("Pieces on the board:");
-		console.log(pieces);
-  
-		cG.set({
-		  movable: { dests: result }
-		});
-		// got final result
-	});
+	move(cG);
 
     cG.set({
       movable: { events: { after: playOtherSide1(cG) } }
