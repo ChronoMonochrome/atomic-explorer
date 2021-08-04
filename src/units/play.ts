@@ -54,9 +54,16 @@ export function capture(cG: any, key: cg.Key) {
 var turnColor1 = 0;
 
 export function playOtherSide1(cG: any/*, turnColor: any*/) {
+  //console.log(cG.getFen());
+  let pieces = cG.state.pieces;
   return (orig, dest) => {
     //chess.move({from: orig, to: dest});
 	console.log("Moved from " + orig + " to " + dest);
+	
+	if (pieces.get(dest) != undefined) {
+		console.log("Destination square is occupied, calling a nuke on that square!");
+		capture(cG, dest);
+	}
 
 	console.log("New fen is: ");
 	//var fen = JSON.stringify(cg.getFen()).slice(1, -1) + " " + ((turnColor == "white") ? "w" : "b");
