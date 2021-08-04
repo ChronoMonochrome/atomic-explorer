@@ -59,11 +59,11 @@ function mapToObj(map){
 }
 
 var turnColor1 = 0;
+var pieces;
 
 export function playOtherSide1(cG: any/*, turnColor: any*/) {
   //console.log(cG.getFen());
-  let pieces = mapToObj(cG.state.pieces);
-  console.log(pieces);
+
   return (orig, dest) => {
     //chess.move({from: orig, to: dest});
 	console.log("Moved from " + orig + " to " + dest);
@@ -85,6 +85,10 @@ export function playOtherSide1(cG: any/*, turnColor: any*/) {
 	getDests(fen).then(result => {
 		console.log("Available moves: ");
 		console.log(result);
+		
+		pieces = mapToObj(cG.state.pieces);
+		console.log("Pieces on the board:");
+		console.log(pieces);
 	
 		cG.set({
 		  turnColor: turnColor,
@@ -120,6 +124,10 @@ export const initial: Unit = {
 	getDests(cG.getFen()).then(result => {
 		console.log(result);
 		
+		pieces = mapToObj(cG.state.pieces);
+		console.log("Pieces on the board:");
+		console.log(pieces);
+  
 		cG.set({
 		  movable: { dests: result }
 		});
