@@ -10,6 +10,7 @@ import { mapToObj, toColor } from '../util'
 ////////////////////////////////////////////////
 var movesCount = 0;
 var pieces;
+var fen;
 
 enum Castling {
     WhiteKingSide = "K",
@@ -24,6 +25,17 @@ let castlingRights = new Map([
     [Castling.BlackKingSide, true],
     [Castling.BlackQueenSide, true]
 ]);
+
+enum Files {
+    A = 97, // "a".charCodeAt()
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H
+};
 
 function castlingToFen(castlingRights: any): any {
     let fen = "";
@@ -92,6 +104,87 @@ function checkCastlingRights(orig: any, dest: any) {
     }
 }
 
+function check4Nuke(cG: any, orig?: any, dest?: any) {
+    if (orig == undefined || dest == undefined)
+        return;
+
+    console.debug("Moved from " + orig + " to " + dest);
+    console.debug(pieces[dest]);
+    
+    console.debug(pieces[orig].role);
+    console.debug(dest, fen.split(" ")[3]);
+    
+    if (pieces[orig].role == "pawn" && dest == fen.split(" ")[3]) {
+        console.debug("En croissant explosion!");
+        capture(cG, dest, true, fen.split(" ")[1]);
+        return;
+    }
+    
+    if (pieces[dest] != undefined) {
+        console.debug("Destination square is occupied, calling a nuke on that square!");
+        capture(cG, dest);
+    }
+}
+
+function check4enPassant(orig?: any, dest?: any) {
+    var res = "-";
+
+    if (orig == undefined || dest == undefined)
+        return res;
+
+    if (pieces[orig].role != "pawn")
+        return res;
+    
+    var origRank = parseInt(orig.slice(1, 2));
+    var destRank = parseInt(dest.slice(1, 2));
+    var rankDiff = Math.abs(origRank - destRank);
+    if (rankDiff < 2)
+        return res;
+        
+    var destFile = dest.slice(0, 1).charCodeAt();
+    var adjacentFile;
+    var adjacentSquare;
+    var enpassantSquare;
+    
+    var adjacentFiles: any[] = [];
+    
+    if (destFile > Files.A) {
+        adjacentFiles.push(destFile - 1);
+    }
+    
+    if (destFile < Files.H) {
+        adjacentFiles.push(destFile + 1);
+    }
+    
+    for (adjacentFile of adjacentFiles) {
+        adjacentSquare = String.fromCharCode(adjacentFile) + String(destRank);
+        
+        console.debug("dest square = " + dest + " adjSq = " + adjacentSquare);
+        
+        if (pieces[adjacentSquare] == undefined)
+            continue;
+
+        if (pieces[adjacentSquare].role != "pawn")
+            continue;
+        
+        if (pieces[orig].color == pieces[adjacentSquare].color)
+            continue;
+
+        if (pieces[orig].color == "white")
+            enpassantSquare = String.fromCharCode(destFile) + String(destRank - 1);
+        else
+            enpassantSquare = String.fromCharCode(destFile) + String(destRank + 1);
+
+        console.debug("enpassantSquare: ");
+        console.debug(enpassantSquare);
+        
+        res = enpassantSquare;
+        break;
+    }
+    
+    return res;
+}
+
 ////////////////////////////////////////////////////
 // end of code to be moved to the control class  //
 //////////////////////////////////////////////////
@@ -115,38 +208,29 @@ async function getDests(fen: any): Promise<Map<any, any[]>> {
 }
 
 export function move(cG: any, orig?: any, dest?: any) {    
-    if (orig != undefined && dest != undefined) {
-        console.log("Moved from " + orig + " to " + dest);
-        console.log(pieces[dest]);
-        
-        if (pieces[dest] != undefined) {
-            console.log("Destination square is occupied, calling a nuke on that square!");
-            capture(cG, dest);
-        }
-    }
-   
-    checkCastlingRights(orig, dest);
-    
-    console.log("Castling rights: ");
-    
-    console.log(castlingRights);
+    check4Nuke(cG, orig, dest);
+
+    checkCastlingRights(orig, dest);    
+    console.debug("Castling rights: ");
+    console.debug(castlingRights);
     
     var fenBase = JSON.stringify(cG.getFen()).slice(1, -1);
     var fenColor = (movesCount % 2 == 0) ? "w" : "b";
     var fenCastling = castlingToFen(castlingRights);
-    var fen = [fenBase, fenColor, fenCastling].join(" ");
+    var fenEnpassant = check4enPassant(orig, dest);
+    fen = [fenBase, fenColor, fenCastling, fenEnpassant].join(" ");
     var turnColor = toColor(fenColor);
 
-    console.log("Fen is: ");
-    console.log(fen);
+    console.debug("Fen is: ");
+    console.debug(fen);
     
     getDests(fen).then(result => {
-        console.log("Available moves: ");
-        console.log(result);
+        console.debug("Available moves: ");
+        console.debug(result);
         
         pieces = mapToObj(cG.state.pieces);
-        console.log("Pieces on the board:");
-        console.log(pieces);
+        console.debug("Pieces on the board:");
+        console.debug(pieces);
 
         cG.set({
           turnColor: turnColor,
@@ -160,7 +244,7 @@ export function move(cG: any, orig?: any, dest?: any) {
     });
 }
 
-export function capture(cG: Api, key: cg.Key) {
+export function capture(cG: Api, key: cg.Key, isEnpassant?: any, color?: any) {
   const exploding: cg.Key[] = [],
     diff: cg.PiecesDiff = new Map(),
     orig = util.key2pos(key),
@@ -177,6 +261,19 @@ export function capture(cG: Api, key: cg.Key) {
       const explodes = p && (k === key || p.role !== 'pawn');
       if (explodes) diff.set(k, undefined);
     }
+  }
+  
+  if (isEnpassant) {
+    var capturedKey;
+    if (color == "w")
+        capturedKey = util.pos2key([orig[0], orig[1] - 1])
+    else
+        capturedKey = util.pos2key([orig[0], orig[1] + 1]);
+    
+    console.debug("capturing pawn on " + capturedKey + " because of en croissant");
+    diff.set(capturedKey, undefined);
+    exploding.push(capturedKey);
+    
   }
   cG.setPieces(diff);
   cG.explode(exploding);
