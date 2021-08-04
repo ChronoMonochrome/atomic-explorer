@@ -51,16 +51,25 @@ export function capture(cG: any, key: cg.Key) {
   cG.explode(exploding);
 }
 
+function mapToObj(map){
+  const obj = {}
+  for (let [k,v] of map)
+    obj[k] = v
+  return obj
+}
+
 var turnColor1 = 0;
 
 export function playOtherSide1(cG: any/*, turnColor: any*/) {
   //console.log(cG.getFen());
-  let pieces = cG.state.pieces;
+  let pieces = mapToObj(cG.state.pieces);
+  console.log(pieces);
   return (orig, dest) => {
     //chess.move({from: orig, to: dest});
 	console.log("Moved from " + orig + " to " + dest);
+	console.log(pieces[dest]);
 	
-	if (pieces.get(dest) != undefined) {
+	if (pieces[dest] != undefined) {
 		console.log("Destination square is occupied, calling a nuke on that square!");
 		capture(cG, dest);
 	}
@@ -105,7 +114,7 @@ export const initial: Unit = {
       }
     });
 	
-	cG.set({fen: "rnbqkbnr/pppp1ppp/4p3/4N3/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1"});
+	//cG.set({fen: "rnbqkbnr/pppp1ppp/4p3/4N3/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1"});
 	//chess = new Chess("8/p7/8/1K1k4/8/8/6P1/8 w - - 0 1");
 
 	getDests(cG.getFen()).then(result => {
