@@ -5,9 +5,9 @@
 # Usage
 
 ```
+pip install Flask Flask-Failsafe Flask-Session python-chess
 yarn install
-yarn exec gulp dev
-pip install Flask Flask-Failsafe Flask-Session
+yarn run dev
 
 python server/runserver.py
 ```

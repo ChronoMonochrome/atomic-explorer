@@ -4,7 +4,7 @@ import { Api } from 'chessground/api';
 import klass from 'snabbdom/modules/class';
 import attributes from 'snabbdom/modules/attributes';
 import listeners from 'snabbdom/modules/eventlisteners';
-import * as page from 'page'
+import page from 'page';
 import { Unit, list } from './units/unit'
 
 export function run(element: Element) {
