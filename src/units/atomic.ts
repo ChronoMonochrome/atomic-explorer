@@ -1,10 +1,12 @@
-import { Chessground }  from 'chessground';
+import { Api } from 'chessground/api';
 import * as util from 'chessground/util';
 import * as cg from 'chessground/types';
-import { Unit } from './unit';
 import { mapToObj } from '../util'
 
-async function getDests(fen: any) : Promise<Map<any, any[]>> {
+var movesCount = 0;
+var pieces;
+
+async function getDests(fen: any): Promise<Map<any, any[]>> {
 	var enc_fen = encodeURIComponent(fen);
 	var resp = await fetch(window.location.origin + "/moves?fen=" + enc_fen, {
 	  // mode: 'no-cors',
@@ -17,9 +19,6 @@ async function getDests(fen: any) : Promise<Map<any, any[]>> {
 	var moves = await resp.text();
 	return new Map(JSON.parse(moves));
 }
-
-var movesCount = 0;
-var pieces;
 
 export function move(cG: any, orig?: any, dest?: any) {	
 	if (orig != undefined && dest != undefined) {
@@ -58,7 +57,7 @@ export function move(cG: any, orig?: any, dest?: any) {
 	});
 }
 
-export function capture(cG: any, key: cg.Key) {
+export function capture(cG: Api, key: cg.Key) {
   const exploding: cg.Key[] = [],
     diff: cg.PiecesDiff = new Map(),
     orig = util.key2pos(key),
@@ -80,35 +79,8 @@ export function capture(cG: any, key: cg.Key) {
   cG.explode(exploding);
 }
 
-export function playOtherSide1(cG: any) {
-  //console.log(cG.getFen());
-
+export function playOtherSide(cG: any) {
   return (orig, dest) => {
 	move(cG, orig, dest);
   };
 }
-
-export const initial: Unit = {
-  name: 'Atomic chess',
-  run(el) {
-    const cG = Chessground(el, {
-      movable: {
-        color: 'white',
-        free: false,
-      },
-      draggable: {
-        showGhost: true
-      }
-    });
-	
-	//cG.set({fen: "rnbqkbnr/pppp1ppp/4p3/4N3/8/8/PPPPPPPP/RNBQKB1R w KQkq - 0 1"});
-
-	move(cG);
-
-    cG.set({
-      movable: { events: { after: playOtherSide1(cG) } }
-    });
-
-    return cG;
-  }
-};
