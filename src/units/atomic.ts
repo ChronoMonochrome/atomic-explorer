@@ -191,6 +191,7 @@ function check4enPassant(orig?: any, dest?: any) {
 
 declare global {
     interface Window { chessground: any; }
+    interface Window { variant: any; }
 }
 
 async function getDests(fen: any): Promise<Map<any, any[]>> {
@@ -258,7 +259,10 @@ export function capture(cG: Api, key: cg.Key, isEnpassant?: any, color?: any) {
       const k = util.pos2key([x, y]);
       exploding.push(k);
       const p = cG.state.pieces.get(k);
-      const explodes = p && (k === key || p.role !== 'pawn');
+      let explodes = p && (k === key || p.role !== 'pawn');
+	  if (window.variant == "atomar") 
+		  explodes &&= (p.role !== 'king');
+
       if (explodes) diff.set(k, undefined);
     }
   }
@@ -285,7 +289,7 @@ export function playOtherSide(cG: any) {
   };
 }
 
-export function getChessground(el: any, config?: any) {
+export function getChessground(el: any, variant?: any, config?: any) {
     const cG = Chessground(el, {
       movable: {
         color: 'white',
@@ -295,7 +299,7 @@ export function getChessground(el: any, config?: any) {
         showGhost: true
       }
     });
-
+	
     move(cG);
     
     if (config != undefined) {
@@ -307,6 +311,7 @@ export function getChessground(el: any, config?: any) {
     });
     
     window.chessground = cG;
+    window.variant = variant;
 
     return cG;
 }

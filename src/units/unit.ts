@@ -1,6 +1,7 @@
 import { Api } from 'chessground/api';
 
-import { explorer } from './explorer'
+//import { explorer } from './explorer'
+import { atomarExplorer } from './atomar_explorer'
 
 export interface Unit {
   name: string;
@@ -8,5 +9,6 @@ export interface Unit {
 }
 
 export const list: Unit[] = [
-  explorer
+  //explorer,
+  atomarExplorer
 ];
