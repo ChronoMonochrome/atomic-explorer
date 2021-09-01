@@ -39,14 +39,14 @@ export function run(element: Element) {
 
   function render() {
     return h('div#chessground-examples', [
-      /*h('menu', list.map((ex, id) => {
+      h('menu', list.map((ex, id) => {
         return h('a', {
           class: {
             active: unit.name === ex.name
           },
           on: { click: () => page(`/${id}`) }
         }, ex.name);
-      })),*/
+      })),
       h('section.blue.merida', [
         h('div.cg-wrap', {
           hook: {
@@ -54,7 +54,27 @@ export function run(element: Element) {
             postpatch: runUnit
           }
         }),
-        h('p', unit.name)
+        h('p', unit.name),
+        h('p', [
+        h('label.zoom', [
+          'FEN',
+          h('input.fen', {
+            attrs: {
+			  id: "fen",
+              value: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+            },
+            on: {
+              change(e) {
+                let FEN = (e.target as HTMLInputElement).value;
+				unit.setFen(cg, FEN);
+                //console.log(FEN);
+				//window.FEN = FEN;
+				//window.cg.set({fen: FEN});
+              }
+            }
+          })
+        ])
+      ]),
       ]),
       h('control', [
         h('button', { on: { click() { cg.toggleOrientation(); }}}, 'Toggle orientation'),
@@ -74,7 +94,7 @@ export function run(element: Element) {
             }
           }, 'Toggle orientation')
         ])
-      ])
+      ]),
     ]);
   }
 

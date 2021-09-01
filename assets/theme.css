@@ -41,3 +41,7 @@
 .merida .cg-wrap piece.king.black {
   background-image: url('images/pieces/merida/bK.svg');
 }
+input.fen {
+	width: 90%;
+}
+}

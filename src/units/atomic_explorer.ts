@@ -1,9 +1,10 @@
 import { Unit } from './unit';
-import { getChessground } from './atomic';
+import { getChessground, setFen } from './atomic';
 
-export const explorer: Unit = {
+export const atomicExplorer: Unit = {
   name: 'Atomic chess explorer',
   run(el) {
     return getChessground(el, 'atomic');
-  }
+  },
+  setFen: setFen
 };

@@ -192,6 +192,7 @@ function check4enPassant(orig?: any, dest?: any) {
 declare global {
     interface Window { chessground: any; }
     interface Window { variant: any; }
+    interface Window { setFen: any; }
 }
 
 async function getDests(fen: any): Promise<Map<any, any[]>> {
@@ -206,6 +207,19 @@ async function getDests(fen: any): Promise<Map<any, any[]>> {
     
     var moves = await resp.text();
     return new Map(JSON.parse(moves));
+}
+
+export function setFen(cG: any, fen: any) {
+	cG.set({fen: fen});
+	let fenParts = fen.split(" ")
+	if (fenParts.length > 4)
+		movesCount = fenParts[4];
+	else
+		movesCount = 0;
+	
+	console.log(movesCount);
+
+	move(cG);
 }
 
 export function move(cG: any, orig?: any, dest?: any) {    
@@ -224,6 +238,10 @@ export function move(cG: any, orig?: any, dest?: any) {
 
     console.debug("Fen is: ");
     console.debug(fen);
+	
+	const fenInput = document.querySelector('#fen') as HTMLElement;
+	//console.log(fenInput);
+	fenInput.setAttribute("value", fen);
     
     getDests(fen).then(result => {
         console.debug("Available moves: ");
@@ -300,6 +318,7 @@ export function getChessground(el: any, variant?: any, config?: any) {
       }
     });
 	
+	//cG.set({fen: "8/8/8/3Kk3/8/8/8/R7 w - - 0 1"});
     move(cG);
     
     if (config != undefined) {
@@ -312,6 +331,7 @@ export function getChessground(el: any, variant?: any, config?: any) {
     
     window.chessground = cG;
     window.variant = variant;
+	window.setFen = setFen;
 
     return cG;
 }
