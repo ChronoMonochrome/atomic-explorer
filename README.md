@@ -1,6 +1,6 @@
-# Atomar chess explorer
+# Atomic / Atomar chess explorer
 
-![Promo](media/atomar.gif)
+![Promo](media/atomic.gif)
 
 # Usage
 
