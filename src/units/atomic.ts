@@ -317,8 +317,8 @@ export function getChessground(el: any, variant?: any, config?: any) {
         showGhost: true
       }
     });
-	
-	//cG.set({fen: "8/8/8/3Kk3/8/8/8/R7 w - - 0 1"});
+
+    movesCount = 0;
     move(cG);
     
     if (config != undefined) {
