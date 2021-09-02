@@ -32,7 +32,7 @@ class AtomarBoard(chess.Board):
 
     def has_insufficient_material(self, color: chess.Color) -> bool:
         # Remaining material does not matter if opponent's king is already
-        # exploded.
+        # captured.
         if not (self.occupied_co[not color] & self.kings):
             return False
 
@@ -40,28 +40,13 @@ class AtomarBoard(chess.Board):
         if not (self.occupied_co[color] & ~self.kings):
             return True
 
-        # As long as the opponent's king is not alone, there is always a chance
-        # their own pieces explode next to it.
-        if self.occupied_co[not color] & ~self.kings:
-            # Unless there are only bishops that cannot explode each other.
-            if self.occupied == self.bishops | self.kings:
-                if not (self.bishops & self.occupied_co[chess.WHITE] & chess.BB_DARK_SQUARES):
-                    return not (self.bishops & self.occupied_co[chess.BLACK] & chess.BB_LIGHT_SQUARES)
-                if not (self.bishops & self.occupied_co[chess.WHITE] & chess.BB_LIGHT_SQUARES):
-                    return not (self.bishops & self.occupied_co[chess.BLACK] & chess.BB_DARK_SQUARES)
-            return False
-
         # Queen or pawn (future queen) can give mate against bare king.
         if self.queens or self.pawns:
             return False
 
-        # Single knight, bishop or rook cannot mate against bare king.
-        if chess.popcount(self.knights | self.bishops | self.rooks) == 1:
+        # Single knight or bishop cannot mate against bare king.
+        if chess.popcount(self.knights | self.bishops) == 1:
             return True
-
-        # Two knights cannot mate against bare king.
-        if self.occupied == self.knights | self.kings:
-            return chess.popcount(self.knights) <= 2
 
         return False
 
