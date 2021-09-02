@@ -193,6 +193,7 @@ declare global {
     interface Window { chessground: any; }
     interface Window { variant: any; }
     interface Window { setFen: any; }
+    interface Window { movesCount: any; }
 }
 
 async function getDests(fen: any): Promise<Map<any, any[]>> {
@@ -211,11 +212,17 @@ async function getDests(fen: any): Promise<Map<any, any[]>> {
 
 export function setFen(cG: any, fen: any) {
 	cG.set({fen: fen});
+	console.log(fen);
 	let fenParts = fen.split(" ")
-	if (fenParts.length > 4)
-		movesCount = fenParts[4];
-	else
+	let fenColor, fullMoves;
+	if (fenParts.length > 4) {
+		fenColor = fenParts[1];
+		fullMoves = fenParts[5];
+		//console.log(fenColor, fullMoves);
+		movesCount = (fullMoves - 1) * 2 + (fenColor == "b" ? 1 : 0);
+	} else {
 		movesCount = 0;
+	}
 	
 	console.log(movesCount);
 
@@ -259,6 +266,7 @@ export function move(cG: any, orig?: any, dest?: any) {
         });
         
         movesCount++;
+		window.movesCount = movesCount;
     });
 }
 
@@ -331,6 +339,7 @@ export function getChessground(el: any, variant?: any, config?: any) {
     window.chessground = cG;
     window.variant = variant;
 	window.setFen = setFen;
+	window.movesCount = movesCount;
 
     return cG;
 }
