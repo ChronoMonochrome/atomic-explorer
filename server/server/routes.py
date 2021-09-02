@@ -131,9 +131,8 @@ class AtomarBoard(chess.Board):
         status &= ~chess.STATUS_IMPOSSIBLE_CHECK
         return status
         
-board = AtomarBoard()
-
-#board = chess.variant.AtomarBoard()
+atomarBoard = AtomarBoard()
+atomicBoard = chess.variant.AtomicBoard()
 
 def encodeFen(fen):
     return urllib.parse.quote(fen, safe = "")
@@ -162,7 +161,14 @@ def home():
     
 @app.route("/moves")
 def moves():
+    variant = request.args.get('variant', 'atomic')
+    board = atomicBoard
+
+    if (variant == 'atomar'):
+        board = atomarBoard
+
     fen = decodeFen(request.args.get('fen', board.fen()))
+    
 
     board.set_fen(fen)
     return str(moves2chessground(board.legal_moves)).replace("'", "\"")
