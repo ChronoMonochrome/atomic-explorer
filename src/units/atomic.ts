@@ -240,8 +240,7 @@ export function move(cG: any, orig?: any, dest?: any) {
     console.debug(fen);
 	
 	const fenInput = document.querySelector('#fen') as HTMLElement;
-	//console.log(fenInput);
-	fenInput.setAttribute("value", fen);
+	fenInput.value = fen;
     
     getDests(fen).then(result => {
         console.debug("Available moves: ");
